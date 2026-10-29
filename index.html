@@ -419,7 +419,7 @@ function renderLevels(){
     const g=best[L.id];
     const lv=COURSE[L.id]; if(!lv) b.classList.add('plain');
     b.innerHTML=`${lv?`<span class="lv">${lv}</span>`:''}${L.id==='random'?'自由練習・隨機浪':L.name}${g?`<span class="badge">${g}</span>`:''}`;
-    b.addEventListener('click',()=>{ if(G.phase==='run'||G.phase==='post') return; G.level=L; renderLevels(); newWave(); renderIntro(); });
+    b.addEventListener('click',()=>{ if(G.phase==='run'||G.phase==='post') return; G.level=L; renderLevels(); newWave(); renderIntro(); track('level_select',{level:L.id}); });
     box.appendChild(b);
   });
 }
@@ -427,8 +427,8 @@ function renderLevels(){
 // ---------- input ----------
 function press(){
   audioInit();
-  if(G.phase==='ready'){ G.phase='run'; updateUI(); return; }
-  if(G.phase==='done'){ resetRun(); renderIntro(); G.phase='run'; updateUI(); return; }
+  if(G.phase==='ready'){ G.phase='run'; updateUI(); track('game_start',{level:G.level.id}); return; }
+  if(G.phase==='done'){ resetRun(); renderIntro(); G.phase='run'; updateUI(); track('game_start',{level:G.level.id,retry:'yes'}); return; }
   if(G.phase!=='run') return;
   const next=nextAction();
   if(next) G.pending=next;
@@ -551,6 +551,7 @@ function frame(now){
     }
     if(s.result){
       G.phase='post'; G.postT=0; G.report=buildReport(); updateUI();
+      track('game_result',{level:G.level.id,result:s.result,grade:G.report&&G.report.ok?G.report.grade:'fail',cause:s.cause||'none'});
       if(s.result==='ok') SND.win(); else if(s.cause==='caught'){ G.shake=0.7; SND.fail(); } else SND.lose();
     }
   } else if(G.phase==='post'){
@@ -1092,6 +1093,35 @@ newWave();
 renderIntro();
 requestAnimationFrame(frame);
 
+// ---------- 追蹤（Google Analytics 4）----------
+// 填入 GA4 的評估 ID（G- 開頭）。留空就完全不追蹤。
+const GA_ID = '';
+let gaOn = false;
+// 來源參數：在 LIFF 網址後面加 ?src=名稱，例如 https://liff.line.me/2012274845-HP96ecgc?src=ig_story
+function trafficSource(){
+  const q = new URLSearchParams(location.search);
+  let src = q.get('src');
+  const state = q.get('liff.state');
+  if (!src && state) { const i = state.indexOf('?'); if (i >= 0) src = new URLSearchParams(state.slice(i + 1)).get('src'); }
+  return src || 'direct';
+}
+function startAnalytics(){
+  if (!GA_ID || gaOn) return;
+  gaOn = true;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ dataLayer.push(arguments); };
+  gtag('js', new Date());
+  const inLine = liffReady && liff.isInClient() ? 'line_app' : 'browser';
+  gtag('config', GA_ID, { src: trafficSource(), opened_in: inLine });
+  const sc = document.createElement('script'); sc.async = true;
+  sc.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+  document.head.appendChild(sc);
+}
+function track(name, params){
+  if (!gaOn) return;
+  gtag('event', name, Object.assign({ src: trafficSource() }, params || {}));
+}
+
 // ---------- LINE LIFF ----------
 // 把下面換成 LINE Developers Console 給你的 LIFF ID（例如 1234567890-AbCdEfGh）
 const LIFF_ID = '2012274845-HP96ecgc';
@@ -1099,10 +1129,12 @@ let liffReady = false;
 if (window.liff && LIFF_ID) {
   liff.init({ liffId: LIFF_ID })
     .then(() => { liffReady = true; })
-    .catch(err => console.warn('LIFF 初始化失敗', err));
-}
+    .catch(err => console.warn('LIFF 初始化失敗', err))
+    .finally(startAnalytics);   // LIFF 會在 init 之後把網址上的 ?src= 參數還原，所以等它好了再開始追蹤
+} else startAnalytics();
 function canShare(){ return liffReady && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker'); }
 function shareResult(){
+  track('share_click',{level:G.level.id});
   const rep = G.report, name = G.level.id==='random' ? '自由練習' : G.level.name;
   const line = rep && rep.ok ? `我在 WAVESLOW 浪人潛越「${name}」拿到 ${rep.grade}：${rep.title}！` : `我在 WAVESLOW 浪人潛越「${name}」被浪捲走了，你來試試？`;
   liff.shareTargetPicker([{ type:'text', text:`${line}\nhttps://liff.line.me/${LIFF_ID}` }])
