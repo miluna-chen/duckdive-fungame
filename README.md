@@ -31,7 +31,7 @@ WAVESLOW 浪漫衝浪教學的潛越訓練小遊戲。以第一視角迎向白�
 | Facebook | https://liff.line.me/2012274845-HP96ecgc?src=facebook |
 
 ### Google Analytics 4
-`index.html` 裡的 `const GA_ID = ''` 填入 GA4 評估 ID（G- 開頭）後開始追蹤，留空則不追蹤。會送出的事件：
+評估 ID 寫在 `index.html` 的 `const GA_ID`，目前是 `G-FL7SBEKCVW`。改成空字串 `''` 就會停止追蹤。會送出的事件：
 
 - `page_view`：打開遊戲（附 `src` 來源、`opened_in` 是在 LINE 裡還是一般瀏覽器）
 - `level_select`：切換關卡（`level`）
