@@ -1094,9 +1094,9 @@ requestAnimationFrame(frame);
 
 // ---------- LINE LIFF ----------
 // 把下面換成 LINE Developers Console 給你的 LIFF ID（例如 1234567890-AbCdEfGh）
-const LIFF_ID = 'YOUR_LIFF_ID';
+const LIFF_ID = '2012274845-HP96ecgc';
 let liffReady = false;
-if (window.liff && LIFF_ID !== 'YOUR_LIFF_ID') {
+if (window.liff && LIFF_ID) {
   liff.init({ liffId: LIFF_ID })
     .then(() => { liffReady = true; })
     .catch(err => console.warn('LIFF 初始化失敗', err));

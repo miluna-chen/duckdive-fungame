@@ -5,7 +5,7 @@ WAVESLOW 浪漫衝浪教學的潛越訓練小遊戲。以第一視角迎向白�
 ## 網址
 
 - GitHub Pages：https://miluna-chen.github.io/duckdive-fungame/
-- LINE LIFF：https://liff.line.me/你的LIFF_ID（設定完成後）
+- LINE LIFF：https://liff.line.me/2012274845-HP96ecgc
 
 ## 檔案
 
@@ -14,6 +14,6 @@ WAVESLOW 浪漫衝浪教學的潛越訓練小遊戲。以第一視角迎向白�
 ## 設定 LIFF ID
 
 1. 在 LINE Developers Console 的 LINE Login channel 新增 LIFF app，Endpoint URL 填上面的 GitHub Pages 網址，Size 選 Full，打開 Share target picker。
-2. 打開 `index.html`，搜尋 `YOUR_LIFF_ID`，換成拿到的 LIFF ID，commit 後 GitHub Pages 會自動更新。
+2. LIFF ID 寫在 `index.html` 的 `const LIFF_ID`，目前是 `2012274845-HP96ecgc`。換 LIFF app 時改這一行，commit 後 GitHub Pages 會自動更新。
 
-沒有填 LIFF ID 時，遊戲一樣能在一般瀏覽器玩，只是不會出現「分享成績給朋友」按鈕。
+在一般瀏覽器開也能玩，只是不會出現「分享成績給朋友」按鈕（這個按鈕只在 LINE 裡出現）。
